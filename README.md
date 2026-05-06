@@ -60,28 +60,33 @@
 - Python 3.10+ (推奨 3.11)
 - インターネット接続のみ
 
-### インストール
+### Windows (初心者向け、ダブルクリックで起動)
+
+> 詳しい手順は [`SETUP_WINDOWS.md`](./SETUP_WINDOWS.md) を参照してください。
+
+1. [Python 3.12](https://www.python.org/downloads/windows/) をインストール (**`Add python.exe to PATH` に必ずチェック**)
+2. このリポジトリを ZIP でダウンロードして展開
+3. `scripts\setup.bat` を **ダブルクリック** (初回のみ・数分かかります)
+4. `run.bat` を **ダブルクリック** → 自動でブラウザが開きます
+
+### macOS / Linux
 
 ```bash
 git clone <this-repo>
 cd ALERT_Codex
-python3 -m venv .venv
-source .venv/bin/activate    # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+./scripts/setup.sh run        # venv 作成 + インストール + 起動を一括
 ```
 
-### 起動
+または手動で:
 
 ```bash
-# 初回データ取得 + サーバ起動 (推奨)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 python -m backend.main
-
-# または uvicorn で直接
-uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
 ブラウザで <http://127.0.0.1:8000> を開きます。
-
 データはバックグラウンドで自動更新されます (デフォルト 10 分間隔)。
 
 ---
