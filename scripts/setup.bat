@@ -1,8 +1,9 @@
 @echo off
 REM ============================================================
 REM  World Monitor - Windows setup script
-REM  使い方: このファイルをダブルクリックするだけ
+REM  Just double-click this file to set up.
 REM ============================================================
+chcp 65001 >nul
 setlocal
 
 cd /d "%~dp0\.."
@@ -12,45 +13,45 @@ echo   World Monitor - Windows setup
 echo =====================================================
 echo.
 
-REM Python の存在チェック
+REM Check Python availability
 where python >nul 2>nul
 if errorlevel 1 (
-    echo [ERROR] Python が見つかりません。
+    echo [ERROR] Python not found.
     echo.
-    echo Python 3.10 以上を先にインストールしてください:
+    echo Please install Python 3.10 or newer first:
     echo   https://www.python.org/downloads/windows/
     echo.
-    echo インストール時に "Add python.exe to PATH" に必ずチェックを入れてください。
+    echo IMPORTANT: tick "Add python.exe to PATH" during installation.
     echo.
     pause
     exit /b 1
 )
 
-REM venv 作成
+REM Create venv if missing
 if not exist ".venv" (
-    echo ^>^> 仮想環境 .venv を作成中...
+    echo Creating virtual environment .venv ...
     python -m venv .venv
     if errorlevel 1 (
-        echo [ERROR] venv の作成に失敗しました。
+        echo [ERROR] Failed to create venv.
         pause
         exit /b 1
     )
 )
 
-echo ^>^> 依存ライブラリをインストール中... ^(初回は数分かかります^)
+echo Installing dependencies ^(first run takes a few minutes^) ...
 ".venv\Scripts\python.exe" -m pip install --upgrade pip --quiet
 ".venv\Scripts\python.exe" -m pip install -r requirements.txt
 if errorlevel 1 (
-    echo [ERROR] 依存ライブラリのインストールに失敗しました。
+    echo [ERROR] Dependency installation failed.
     pause
     exit /b 1
 )
 
 echo.
 echo =====================================================
-echo   セットアップ完了！
+echo   Setup complete!
 echo =====================================================
 echo.
-echo 起動するには run.bat をダブルクリックしてください。
+echo To start the dashboard, double-click run.bat
 echo.
 pause
