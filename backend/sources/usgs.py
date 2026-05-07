@@ -54,6 +54,9 @@ async def fetch(client: httpx.AsyncClient) -> list[dict]:
         place = props.get("place") or ""
         url = props.get("url") or ""
         time_ms = props.get("time")
+        coords = (f.get("geometry") or {}).get("coordinates") or []
+        lat = float(coords[1]) if len(coords) >= 2 else None
+        lon = float(coords[0]) if len(coords) >= 1 else None
         published = (
             datetime.fromtimestamp(time_ms / 1000, tz=timezone.utc).isoformat()
             if time_ms else None
@@ -75,6 +78,8 @@ async def fetch(client: httpx.AsyncClient) -> list[dict]:
                 "categories": ["disaster"],
                 "importance": importance,
                 "raw_json": None,
+                "lat": lat,
+                "lon": lon,
             }
         )
     return out

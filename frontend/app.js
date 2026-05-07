@@ -147,6 +147,7 @@ async function loadEvents() {
   try {
     const { events } = await fetchJSON("/api/events?" + params.toString());
     renderEvents(events || []);
+    updateMap(events || []);
     $("feed-meta").textContent = `${events.length} events`;
   } catch (e) {
     console.warn("events failed", e);
@@ -180,6 +181,65 @@ function renderEvents(events) {
       <div class="tags">${region}${tags}</div>
     `;
     ul.appendChild(li);
+  }
+}
+
+// ─── map ───────────────────────────────
+const REGION_CENTERS = {
+  americas:    [4,  -80],
+  europe:      [52,  15],
+  middle_east: [30,  45],
+  africa:      [5,   20],
+  asia:        [35, 105],
+  russia_cis:  [57,  75],
+  global:      [20,   0],
+};
+
+let leafletMap = null;
+let markersLayer = null;
+
+function initMap() {
+  leafletMap = L.map("map", { center: [20, 10], zoom: 2, minZoom: 1, maxZoom: 8 });
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 19,
+  }).addTo(leafletMap);
+  markersLayer = L.layerGroup().addTo(leafletMap);
+}
+
+function updateMap(events) {
+  if (!markersLayer) return;
+  markersLayer.clearLayers();
+
+  for (const ev of events) {
+    let lat, lon;
+
+    if (ev.lat != null && ev.lon != null) {
+      lat = ev.lat;
+      lon = ev.lon;
+    } else if (ev.importance >= 3) {
+      const c = REGION_CENTERS[ev.region] || REGION_CENTERS.global;
+      const h = [...(ev.id || "x")].reduce((a, ch) => (Math.imul(a, 31) + ch.charCodeAt(0)) | 0, 0);
+      lat = c[0] + ((h & 0xFF) - 128) / 20;
+      lon = c[1] + (((h >> 8) & 0xFF) - 128) / 10;
+    } else {
+      continue;
+    }
+
+    const color = ev.importance >= 6 ? "#ff5566" : ev.importance >= 3 ? "#ffb454" : "#00d4ff";
+    const r = Math.max(4, Math.min(12, 3 + ev.importance * 0.9));
+
+    L.circleMarker([lat, lon], {
+      radius: r,
+      fillColor: color,
+      color: "rgba(0,0,0,0.4)",
+      weight: 1,
+      fillOpacity: 0.75,
+    }).bindPopup(
+      `<strong>${escapeHtml(ev.title)}</strong><br>` +
+      `<span style="color:var(--muted);font-size:11px">${escapeHtml(ev.source)} · ${fmtTime(ev.published_at || ev.fetched_at)}</span>` +
+      (ev.url ? `<br><a href="${escapeHtml(ev.url)}" target="_blank" rel="noopener">Read →</a>` : "")
+    ).addTo(markersLayer);
   }
 }
 
@@ -218,6 +278,7 @@ $("refresh").addEventListener("click", async () => {
 
 // ─── boot ───────────────────────────────
 async function boot() {
+  initMap();
   await loadMeta();
   await Promise.all([loadEvents(), loadStats(), loadSources()]);
   $("last-update").textContent = "Updated " + new Date().toISOString().slice(11, 19) + " UTC";

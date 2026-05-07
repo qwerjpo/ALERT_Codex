@@ -26,7 +26,9 @@ CREATE TABLE IF NOT EXISTS events (
     region TEXT,
     categories TEXT,                 -- カンマ区切り
     importance REAL DEFAULT 0,
-    raw_json TEXT
+    raw_json TEXT,
+    lat REAL,
+    lon REAL
 );
 
 CREATE INDEX IF NOT EXISTS idx_events_published_at ON events(published_at DESC);
@@ -68,6 +70,11 @@ def transaction() -> Iterator[sqlite3.Connection]:
 def init_db() -> None:
     with transaction() as conn:
         conn.executescript(SCHEMA)
+        for col_def in ("lat REAL", "lon REAL"):
+            try:
+                conn.execute(f"ALTER TABLE events ADD COLUMN {col_def}")
+            except sqlite3.OperationalError:
+                pass
 
 
 def upsert_events(events: Iterable[dict[str, Any]]) -> int:
@@ -83,8 +90,8 @@ def upsert_events(events: Iterable[dict[str, Any]]) -> int:
                     """
                     INSERT OR IGNORE INTO events
                     (id, source, title, summary, url, published_at, fetched_at,
-                     region, categories, importance, raw_json)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     region, categories, importance, raw_json, lat, lon)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         ev["id"],
@@ -98,6 +105,8 @@ def upsert_events(events: Iterable[dict[str, Any]]) -> int:
                         ",".join(ev.get("categories") or []),
                         float(ev.get("importance") or 0.0),
                         ev.get("raw_json"),
+                        ev.get("lat"),
+                        ev.get("lon"),
                     ),
                 )
                 if conn.total_changes:
