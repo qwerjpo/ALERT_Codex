@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import logging
 from datetime import datetime, timezone
@@ -88,12 +89,14 @@ async def fetch_one(source: dict, client: httpx.AsyncClient) -> list[dict]:
 
 
 async def fetch_all(client: httpx.AsyncClient) -> list[tuple[dict, list[dict] | Exception]]:
-    """設定済み RSS をすべてフェッチ。例外もタプルで返す。"""
-    results: list[tuple[dict, list[dict] | Exception]] = []
-    for src in RSS_SOURCES:
-        try:
-            evs = await fetch_one(src, client)
-            results.append((src, evs))
-        except Exception as e:  # noqa: BLE001
-            results.append((src, e))
-    return results
+    """設定済み RSS を並列フェッチ (同時最大20接続)。例外もタプルで返す。"""
+    sem = asyncio.Semaphore(20)
+
+    async def _fetch_guarded(src: dict) -> tuple[dict, list[dict] | Exception]:
+        async with sem:
+            try:
+                return (src, await fetch_one(src, client))
+            except Exception as e:  # noqa: BLE001
+                return (src, e)
+
+    return list(await asyncio.gather(*[_fetch_guarded(s) for s in RSS_SOURCES]))
