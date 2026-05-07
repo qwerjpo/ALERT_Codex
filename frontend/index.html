@@ -1,11 +1,10 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>World Monitor — OSINT Dashboard</title>
+  <title>World Monitor - OSINT Dashboard</title>
   <link rel="stylesheet" href="/static/style.css" />
-  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><circle cx='32' cy='32' r='28' fill='%2300d4ff'/><text x='32' y='44' font-size='38' text-anchor='middle' fill='%23000'>W</text></svg>" />
 </head>
 <body>
   <header class="topbar">
@@ -15,61 +14,51 @@
       <span class="subtitle">personal OSINT dashboard</span>
     </div>
     <div class="actions">
-      <input id="search" type="search" placeholder="検索 (title / summary)…" autocomplete="off" />
-      <button id="refresh" title="手動でフィードを更新">⟳ Refresh</button>
+      <input id="search" type="search" placeholder="Search (title / summary)..." autocomplete="off" />
+      <button id="refresh" title="Manual refresh">&#8635; Refresh</button>
       <span id="live" class="live">live</span>
     </div>
   </header>
-
   <nav class="filters">
-    <div class="group" id="region-filters">
-      <span class="label">REGION</span>
-    </div>
-    <div class="group" id="category-filters">
-      <span class="label">CATEGORY</span>
-    </div>
+    <div class="group" id="region-filters"><span class="label">REGION</span></div>
+    <div class="group" id="category-filters"><span class="label">CATEGORY</span></div>
     <div class="group">
       <span class="label">PRIORITY</span>
       <input id="importance" type="range" min="0" max="10" step="0.5" value="0" />
       <span id="importance-val">0.0+</span>
     </div>
   </nav>
-
   <main class="layout">
     <section class="panel stats" id="stats-panel">
       <h2>SIGNAL OVERVIEW</h2>
       <div class="stats-grid">
-        <div class="stat"><span class="num" id="stat-total">—</span><span class="lbl">total events</span></div>
-        <div class="stat"><span class="num" id="stat-mil">—</span><span class="lbl">military</span></div>
-        <div class="stat"><span class="num" id="stat-pol">—</span><span class="lbl">politics</span></div>
-        <div class="stat"><span class="num" id="stat-cyb">—</span><span class="lbl">cyber</span></div>
+        <div class="stat"><span class="num" id="stat-total">-</span><span class="lbl">total events</span></div>
+        <div class="stat"><span class="num" id="stat-mil">-</span><span class="lbl">military</span></div>
+        <div class="stat"><span class="num" id="stat-pol">-</span><span class="lbl">politics</span></div>
+        <div class="stat"><span class="num" id="stat-cyb">-</span><span class="lbl">cyber</span></div>
       </div>
       <div class="bars" id="region-bars"></div>
     </section>
-
     <section class="panel feed">
       <div class="feed-head">
         <h2>EVENT FEED</h2>
-        <span class="meta" id="feed-meta">—</span>
+        <span class="meta" id="feed-meta">-</span>
       </div>
       <ul id="events" class="events"></ul>
       <div class="empty" id="empty-state" hidden>
-        <p>該当するイベントはまだありません。<br>初回のフェッチには 30〜60 秒ほどかかります。</p>
+        <p>No events yet. Initial fetch takes 30-60 seconds.</p>
       </div>
     </section>
-
     <aside class="panel sources">
       <h2>SOURCES</h2>
       <ul id="sources"></ul>
     </aside>
   </main>
-
   <footer class="bottombar">
-    <span id="last-update">—</span>
-    <span class="sep">·</span>
-    <span>無料公開ソースのみ使用 · No API keys required</span>
+    <span id="last-update">-</span>
+    <span class="sep">&#183;</span>
+    <span>Free public sources only &#183; No API keys required</span>
   </footer>
-
   <script src="/static/app.js"></script>
 </body>
 </html>
