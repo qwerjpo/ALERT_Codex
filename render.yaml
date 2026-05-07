@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: world-monitor
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m backend.main
+    plan: free
+    envVars:
+      - key: WM_REFRESH_INTERVAL
+        value: "600"
+    disk:
+      name: data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
